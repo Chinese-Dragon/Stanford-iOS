@@ -18,7 +18,7 @@ class gameViewController: UIViewController,UpdateScoreDelegate {
         didSet {
             print("gameview is set")
             BreakoutView.delegate = self
-            BreakoutView.addGestureRecognizer(UITapGestureRecognizer(target: BreakoutView, action: #selector(BreakoutView.pushBall(_:))))
+            BreakoutView.addGestureRecognizer(UITapGestureRecognizer(target: BreakoutView, action: #selector(BreakoutView.pushBall)))
             updateGameUI()
             
         }
@@ -43,7 +43,7 @@ class gameViewController: UIViewController,UpdateScoreDelegate {
     }
   
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("viewdidAppear is called")
         BreakoutView.animating = true
@@ -53,7 +53,7 @@ class gameViewController: UIViewController,UpdateScoreDelegate {
         
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         print("viewdidDisappear is called")
         BreakoutView.animating = false
@@ -63,10 +63,10 @@ class gameViewController: UIViewController,UpdateScoreDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if UIDevice.currentDevice().orientation.isLandscape && isPreviousPortrait {
+        if UIDevice.current.orientation.isLandscape && isPreviousPortrait {
             isPreviousPortrait = false
             BreakoutView.resizeUI()
-        } else if UIDevice.currentDevice().orientation.isPortrait && !isPreviousPortrait {
+        } else if UIDevice.current.orientation.isPortrait && !isPreviousPortrait {
             isPreviousPortrait = true
             BreakoutView.resizeUI()
         }

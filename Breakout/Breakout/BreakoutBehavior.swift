@@ -46,11 +46,11 @@ class BreakoutBehavior: UIDynamicBehavior {
         return dib
     }()
     
-    private let pushBehavior = UIPushBehavior(items: [], mode: .Instantaneous)
+    private let pushBehavior = UIPushBehavior(items: [], mode: .instantaneous)
     
     func addBoundary(path: UIBezierPath, named name: String) {
-        collider.removeBoundaryWithIdentifier(name)
-        collider.addBoundaryWithIdentifier(name, forPath: path)
+        collider.removeBoundary(withIdentifier: name as NSCopying)
+        collider.addBoundary(withIdentifier: name as NSCopying, for: path)
     }
     
     func addItem(item: UIDynamicItem) {

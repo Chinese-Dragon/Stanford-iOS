@@ -21,12 +21,12 @@ class GameSettingsViewController: UIViewController {
     
     @IBAction func switchSettings(sender: UISegmentedControl) {
         if sender.selectedSegmentIndex == 0 {
-            UIView.animateWithDuration(0.4, animations: { [unowned self] in
+            UIView.animate(withDuration: 0.4, animations: { [unowned self] in
                 self.GameSettingsControllerContainer.alpha = 1
                 self.UISettingsControllerContainer.alpha = 0
                 })
         } else {
-            UIView.animateWithDuration(0.4, animations: { [unowned self] in
+            UIView.animate(withDuration: 0.4, animations: { [unowned self] in
                 self.GameSettingsControllerContainer.alpha = 0
                 self.UISettingsControllerContainer.alpha = 1
                 

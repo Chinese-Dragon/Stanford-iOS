@@ -120,40 +120,40 @@ class breakOutView: UIView, UICollisionBehaviorDelegate
             brick.tag = SubviewTags.brickTag
             
             addSubview(brick)
-            breakouBehavior.addBoundary(UIBezierPath(rect: brick.frame), named: "boundaryNames.bricks\(i)")
+            breakouBehavior.addBoundary(path: UIBezierPath(rect: brick.frame), named: "boundaryNames.bricks\(i)")
         }
     }
     
     private func addPaddle() {
         let frame = CGRect(center: paddleMid, size: paddleSize)
         let paddle = UIView(frame: frame)
-        paddle.backgroundColor = UIColor.purpleColor()
+        paddle.backgroundColor = UIColor.purple
         paddle.tag = SubviewTags.paddleTag
-        paddle.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(breakOutView.movePaddle(_:))))
+        paddle.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(self.movePaddle)))
         
         addSubview(paddle)
-        breakouBehavior.addBoundary(UIBezierPath(rect: paddle.frame), named: boundaryNames.paddle)
+        breakouBehavior.addBoundary(path: UIBezierPath(rect: paddle.frame), named: boundaryNames.paddle)
     }
     
     private func addBalls() {
         let frame = CGRect(center: CGPoint(x:paddleMid.x,y:paddleMid.y - paddleSize.height), size: ballSize)
         let ball = UIView(frame: frame)
-        ball.backgroundColor = UIColor.blackColor()
+        ball.backgroundColor = UIColor.black
         ball.tag = SubviewTags.ballTag
         
         addSubview(ball)
-        breakouBehavior.addItem(ball)
+        breakouBehavior.addItem(item: ball)
     }
     
     func movePaddle(recognizer: UIPanGestureRecognizer) {
-        let translation = recognizer.translationInView(self)
+        let translation = recognizer.translation(in: self)
         if let view = recognizer.view {
             let translationX = translation.x
             view.center.x += translationX
-            breakouBehavior.addBoundary(UIBezierPath(rect: view.frame), named: boundaryNames.paddle)
+            breakouBehavior.addBoundary(path: UIBezierPath(rect: view.frame), named: boundaryNames.paddle)
         }
         //to keep the translation not cumulating
-        recognizer.setTranslation(CGPointZero, inView: self)
+        recognizer.setTranslation(CGPoint.zero, in: self)
     }
     
     func pushBall(recognizer: UITapGestureRecognizer) {
@@ -173,7 +173,7 @@ class breakOutView: UIView, UICollisionBehaviorDelegate
         for view in self.subviews {
             view.removeFromSuperview()
             if view.tag == SubviewTags.ballTag {
-                breakouBehavior.removeItem(view)
+                breakouBehavior.removeItem(item: view)
             }
         }
         addBricks()
@@ -190,23 +190,23 @@ class breakOutView: UIView, UICollisionBehaviorDelegate
                 currentBricks.append(subview)
             } else if subview.tag == SubviewTags.paddleTag {
                 subview.frame = CGRect(center: paddleMid, size: paddleSize)
-                breakouBehavior.addBoundary(UIBezierPath(rect: subview.frame), named: boundaryNames.paddle)
+                breakouBehavior.addBoundary(path: UIBezierPath(rect: subview.frame), named: boundaryNames.paddle)
             } else if subview.tag == SubviewTags.ballTag {
                 subview.removeFromSuperview()
-                breakouBehavior.removeItem(subview)
+                breakouBehavior.removeItem(item: subview)
                 addBalls()
             }
         }
         
         var _bricksPerRow: Int
-        if UIDevice.currentDevice().orientation.isLandscape {
+        if UIDevice.current.orientation.isLandscape {
             _bricksPerRow = bricksPerRow * 2
             isLandscape = true
-            postionBricks(_bricksPerRow, bricks: currentBricks)
+            postionBricks(bricksPerRow: _bricksPerRow, bricks: currentBricks)
         } else {
             _bricksPerRow = bricksPerRow
             isLandscape = false
-            postionBricks(_bricksPerRow, bricks: currentBricks)
+            postionBricks(bricksPerRow: _bricksPerRow, bricks: currentBricks)
         }
     }
     
@@ -220,31 +220,31 @@ class breakOutView: UIView, UICollisionBehaviorDelegate
                     bricks[i].frame.origin.x = (CGFloat(i % bricksPerRow) * (brickSize.width + bricksSpacing)) + bricksSpacing
                     bricks[i].frame.origin.y = (ceil(CGFloat(i / bricksPerRow)) * (brickSize.height + bricksSpacing))
                 }
-                breakouBehavior.addBoundary(UIBezierPath(rect: bricks[i].frame), named: "boundaryNames.bricks\(i)")
+                breakouBehavior.addBoundary(path: UIBezierPath(rect: bricks[i].frame), named: "boundaryNames.bricks\(i)")
             }
         }
     }
   
     
-    func collisionBehavior(behavior: UICollisionBehavior, beganContactForItem item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, atPoint p: CGPoint) {
-        if let contacted = item as? UIView where contacted.tag == SubviewTags.ballTag && "\(identifier)".containsString(boundaryNames.bricks) {
-            if let path = behavior.boundaryWithIdentifier(identifier!),let hitView = hitTest(path.bounds.mid) where hitView.superview == self && hitView.tag == SubviewTags.brickTag {
+    func collisionBehavior(_ behavior: UICollisionBehavior, beganContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, at p: CGPoint) {
+        if let contacted = item as? UIView , contacted.tag == SubviewTags.ballTag && "\(identifier)".contains(boundaryNames.bricks) {
+            if let path = behavior.boundary(withIdentifier: identifier!),let hitView = hitTest(p: path.bounds.mid) , hitView.superview == self && hitView.tag == SubviewTags.brickTag {
                 if hitView.alpha == 1.0{
-                    UIView.animateWithDuration(
-                        0.2,
+                    UIView.animate(
+                        withDuration: 0.2,
                         delay: 0.2,
-                        options: [UIViewAnimationOptions.CurveLinear],
+                        options: [UIViewAnimationOptions.curveLinear],
                         animations: {hitView.alpha = 0.0},
                         completion: {
                             if $0 {
                                 self.score += 1
                                 if let gameController = self.delegate as? gameViewController {
-                                    gameController.update(self.score)
+                                    gameController.update(currentScore: self.score)
                                 }
                                 // or just
                                 // self.delegate?.update(self.score)
                                 hitView.removeFromSuperview();
-                                behavior.removeBoundaryWithIdentifier(identifier!)
+                                behavior.removeBoundary(withIdentifier: identifier!)
                                 if self.viewWithTag(SubviewTags.brickTag) == nil{
                                     print("there are no bricks left")
                                 }
@@ -255,10 +255,10 @@ class breakOutView: UIView, UICollisionBehaviorDelegate
                 
             }
             
-        } else if let contacted = item as? UIView where contacted.tag == SubviewTags.ballTag && identifier == nil{
+        } else if let contacted = item as? UIView , contacted.tag == SubviewTags.ballTag && identifier == nil{
             if ceil(p.y) > paddleMid.y {
                 contacted.removeFromSuperview()
-                breakouBehavior.removeItem(contacted)
+                breakouBehavior.removeItem(item: contacted)
                 print("you lost")
             }
         }
