@@ -13,13 +13,13 @@ class FallingObjectBehavior: UIDynamicBehavior
     //all childern dynamic behaviors
     let gravity = UIGravityBehavior()
     
-    private let collider: UICollisionBehavior =  {
+    fileprivate let collider: UICollisionBehavior =  {
         let collider = UICollisionBehavior()
         collider.translatesReferenceBoundsIntoBoundary = true
         return collider
     }()
     
-    private let itemBehavior: UIDynamicItemBehavior = {
+    fileprivate let itemBehavior: UIDynamicItemBehavior = {
        let dib = UIDynamicItemBehavior()
         dib.allowsRotation = false
         dib.elasticity = 0.2
@@ -33,19 +33,19 @@ class FallingObjectBehavior: UIDynamicBehavior
         addChildBehavior(itemBehavior)
     }
     
-    func addBarrier(path: UIBezierPath, named name: String) {
-        collider.removeBoundaryWithIdentifier(name)
-        collider.addBoundaryWithIdentifier(name, forPath: path)
+    func addBarrier(_ path: UIBezierPath, named name: String) {
+        collider.removeBoundary(withIdentifier: name as NSCopying)
+        collider.addBoundary(withIdentifier: name as NSCopying, for: path)
         
     }
     
-    func addItem(item: UIDynamicItem) {
+    func addItem(_ item: UIDynamicItem) {
         gravity.addItem(item)
         collider.addItem(item)
         itemBehavior.addItem(item)
     }
     
-    func removeItem(item: UIDynamicItem) {
+    func removeItem(_ item: UIDynamicItem) {
         gravity.removeItem(item)
         collider.removeItem(item)
         itemBehavior.removeItem(item)

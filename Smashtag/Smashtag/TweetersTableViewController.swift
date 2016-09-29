@@ -8,6 +8,26 @@
 
 import UIKit
 import CoreData
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class TweetersTableViewController: CoreDataTableViewController {
     
@@ -21,8 +41,8 @@ class TweetersTableViewController: CoreDataTableViewController {
         didSet { updateUI() }
     }
     
-    private func updateUI() {
-        if let context = managedObjectContext where mention?.characters.count > 0 {
+    fileprivate func updateUI() {
+        if let context = managedObjectContext , mention?.characters.count > 0 {
             let request = NSFetchRequest(entityName: "TwitterUser")
             request.predicate = NSPredicate(format: "any tweets.text contains[c] %@", mention!)
             request.sortDescriptors = [NSSortDescriptor(
@@ -42,25 +62,25 @@ class TweetersTableViewController: CoreDataTableViewController {
         }
     }
     
-    private func tweetCountWithMentionByTwitterUser(user: TwitterUser) -> Int?{
+    fileprivate func tweetCountWithMentionByTwitterUser(_ user: TwitterUser) -> Int?{
         var count: Int?
-        user.managedObjectContext?.performBlockAndWait({ 
+        user.managedObjectContext?.performAndWait({ 
             let request = NSFetchRequest(entityName: "Tweet")
             request.predicate = NSPredicate(format: "text contains[c] %@ and tweeter = %@", self.mention!, user)
-            count = user.managedObjectContext?.countForFetchRequest(request, error: nil)
+            count = user.managedObjectContext?.count(for: request, error: nil)
         })
         return count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TwitterUserCell", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TwitterUserCell", for: indexPath)
 
         // Configure the cell...
-        if let twitterUser = fetchedResultsController?.objectAtIndexPath(indexPath) as? TwitterUser {
+        if let twitterUser = fetchedResultsController?.object(at: indexPath) as? TwitterUser {
             var screenName: String?
             
             //wait until the block is excuted before we configure the cell
-            twitterUser.managedObjectContext?.performBlockAndWait({
+            twitterUser.managedObjectContext?.performAndWait({
                 //cannot update UI in another thread even though in this situation the block is always in the main thread
                 screenName = twitterUser.screenName
             })

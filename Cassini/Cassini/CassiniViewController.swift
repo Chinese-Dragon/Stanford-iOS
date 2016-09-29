@@ -11,13 +11,13 @@ import UIKit
 class CassiniViewController: UIViewController{
     
     //Something we need from Storyboard
-    private struct Storyboard {
+    fileprivate struct Storyboard {
         static let ShowImageSegue = "Show Image"
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Storyboard.ShowImageSegue{
-            if let ivc = segue.destinationViewController.contentViewController as? ImageViewController {
+            if let ivc = segue.destination.contentViewController as? ImageViewController {
                 let imageName = (sender as? UIButton)?.currentTitle
                 ivc.imageURL = DemoURL.NASAImageNamed(imageName)
                 ivc.title = imageName
@@ -26,13 +26,13 @@ class CassiniViewController: UIViewController{
     }
     
     //check if it is in splitViewController (iPad), if true then we just replace content of detail view, if false it means we are in navigationController (iPhone), then we need use segue
-    @IBAction func showImage(sender: UIButton) {
+    @IBAction func showImage(_ sender: UIButton) {
         if let ivc = splitViewController?.viewControllers.last?.contentViewController as? ImageViewController {
             let imageName = sender.currentTitle
             ivc.imageURL = DemoURL.NASAImageNamed(imageName)
             ivc.title = imageName
         } else {
-            performSegueWithIdentifier(Storyboard.ShowImageSegue, sender: sender)
+            performSegue(withIdentifier: Storyboard.ShowImageSegue, sender: sender)
         }
         
     }

@@ -14,7 +14,7 @@ import CoreData
 
 extension Tweet {
 
-    @NSManaged var posted: NSDate?
+    @NSManaged var posted: Date?
     @NSManaged var text: String?
     @NSManaged var unique: String?
     @NSManaged var mentions: NSSet?

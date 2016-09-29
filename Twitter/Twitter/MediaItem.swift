@@ -11,21 +11,21 @@ import Foundation
 // holds the network url and aspectRatio of an image attached to a Tweet
 // created automatically when a Tweet object is created
 
-public class MediaItem: NSObject
+open class MediaItem: NSObject
 {
-    public let url: NSURL
-    public let aspectRatio: Double
+    open let url: URL
+    open let aspectRatio: Double
     
-    public override var description: String { return "\(url.absoluteString) (aspect ratio = \(aspectRatio))" }
+    open override var description: String { return "\(url.absoluteString) (aspect ratio = \(aspectRatio))" }
     
     // MARK: - Internal Implementation
     
     init?(data: NSDictionary?) {
         guard
-            let height = data?.valueForKeyPath(TwitterKey.Height) as? Double where height > 0,
-            let width = data?.valueForKeyPath(TwitterKey.Width) as? Double where width > 0,
-            let urlString = data?.valueForKeyPath(TwitterKey.MediaURL) as? String,
-            let url = NSURL(string: urlString)
+            let height = data?.value(forKeyPath: TwitterKey.Height) as? Double , height > 0,
+            let width = data?.value(forKeyPath: TwitterKey.Width) as? Double , width > 0,
+            let urlString = data?.value(forKeyPath: TwitterKey.MediaURL) as? String,
+            let url = URL(string: urlString)
         else {
             return nil
         }

@@ -16,7 +16,7 @@ class BlinkingFaceViewController: FaceViewController
         }
     }
     
-    private struct BlinkRate {
+    fileprivate struct BlinkRate {
         static let ClosedDuration = 0.4
         static let OpenedDuration = 2.0
     }
@@ -25,8 +25,8 @@ class BlinkingFaceViewController: FaceViewController
         if blinking {
             faceView.eyesOpen = false
             //wait a momeny and open my eye
-            NSTimer.scheduledTimerWithTimeInterval(
-                BlinkRate.ClosedDuration,
+            Timer.scheduledTimer(
+                timeInterval: BlinkRate.ClosedDuration,
                 target: self,
                 selector: #selector(BlinkingFaceViewController.endBlink),
                 userInfo: nil,
@@ -36,20 +36,20 @@ class BlinkingFaceViewController: FaceViewController
     
     func endBlink() {
         faceView.eyesOpen = true
-        NSTimer.scheduledTimerWithTimeInterval(
-            BlinkRate.OpenedDuration,
+        Timer.scheduledTimer(
+            timeInterval: BlinkRate.OpenedDuration,
             target: self,
             selector: #selector(BlinkingFaceViewController.startBlink),
             userInfo: nil,
             repeats: false)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         blinking = true
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         blinking = false
     }

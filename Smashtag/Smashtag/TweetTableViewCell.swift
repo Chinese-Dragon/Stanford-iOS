@@ -19,7 +19,7 @@ class TweetTableViewCell: UITableViewCell {
     
     @IBOutlet weak var tweetCreatedLabel: UILabel!
     
-    private var allMentions = [Array<Twitter.Mention>]()
+    fileprivate var allMentions = [Array<Twitter.Mention>]()
     
     var tweet: Twitter.Tweet? {
         didSet {
@@ -27,13 +27,13 @@ class TweetTableViewCell: UITableViewCell {
         }
     }
     
-    private var mentionColor : Dictionary<String,UIColor> = [
-        "hashtag": UIColor.brownColor(),
-        "url": UIColor.blueColor(),
-        "userMention": UIColor.cyanColor()
+    fileprivate var mentionColor : Dictionary<String,UIColor> = [
+        "hashtag": UIColor.brown,
+        "url": UIColor.blue,
+        "userMention": UIColor.cyan
     ]
 
-    private func assignMentionsColor(type: String, mentions: [Twitter.Mention], mutableString: NSMutableAttributedString) {
+    fileprivate func assignMentionsColor(_ type: String, mentions: [Twitter.Mention], mutableString: NSMutableAttributedString) {
         for mention in mentions {
             if let color = mentionColor[type]{
                 mutableString.addAttribute(NSForegroundColorAttributeName, value: color, range: mention.nsrange)
@@ -41,7 +41,7 @@ class TweetTableViewCell: UITableViewCell {
         }
     }
     
-    private func updateUI()
+    fileprivate func updateUI()
     {
         // reset any existing tweet information
         tweetTextLabel?.attributedText = nil
@@ -69,19 +69,19 @@ class TweetTableViewCell: UITableViewCell {
             tweetScreenNameLabel?.text = "\(tweet.user)" // tweet.user.description
             
             if let profileImageURL = tweet.user.profileImageURL {
-                if let imageData = NSData(contentsOfURL: profileImageURL) { // blocks main thread!
-                    dispatch_async(dispatch_get_main_queue()) {
+                if let imageData = Data(contentsOfURL: profileImageURL) { // blocks main thread!
+                    DispatchQueue.main.async {
                         self.tweetProfileImageView?.image = UIImage(data: imageData)
                     }
                     
                 }
             }
             
-            let formatter = NSDateFormatter()
-            if NSDate().timeIntervalSinceDate(tweet.created) > 24*60*60 {
-                formatter.dateStyle = NSDateFormatterStyle.ShortStyle
+            let formatter = DateFormatter()
+            if Date().timeIntervalSinceDate(tweet.created) > 24*60*60 {
+                formatter.dateStyle = DateFormatter.Style.short
             } else {
-                formatter.timeStyle = NSDateFormatterStyle.ShortStyle
+                formatter.timeStyle = DateFormatter.Style.short
             }
             tweetCreatedLabel?.text = formatter.stringFromDate(tweet.created)
         }

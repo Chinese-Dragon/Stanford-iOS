@@ -15,15 +15,15 @@ class EmotionsViewController: UIViewController, UISplitViewControllerDelegate
         splitViewController?.delegate = self
     }
     
-    private let emotionalFaces: Dictionary<String, FacialExpression> = [
-        "angry": FacialExpression(eyes: .Closed, eyeBrows: .Furrowed, mouth: .Frown),
-        "happy": FacialExpression(eyes: .Open, eyeBrows: .Normal, mouth: .Smile),
-        "worried": FacialExpression(eyes: .Open, eyeBrows: .Relaxed, mouth: .Smirk),
-        "mischievious": FacialExpression(eyes: .Open, eyeBrows: .Furrowed, mouth: .Grin)
+    fileprivate let emotionalFaces: Dictionary<String, FacialExpression> = [
+        "angry": FacialExpression(eyes: .closed, eyeBrows: .furrowed, mouth: .frown),
+        "happy": FacialExpression(eyes: .open, eyeBrows: .normal, mouth: .smile),
+        "worried": FacialExpression(eyes: .open, eyeBrows: .relaxed, mouth: .smirk),
+        "mischievious": FacialExpression(eyes: .open, eyeBrows: .furrowed, mouth: .grin)
     ]
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let destinationvc = segue.destinationViewController as? UINavigationController {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destinationvc = segue.destination as? UINavigationController {
             if let myfacevc = destinationvc.visibleViewController as? BlinkingFaceViewController, let identifier = segue.identifier, let expression = emotionalFaces[identifier]{
                 myfacevc.expression = expression
                 if let sendingButton = sender as? UIButton {
@@ -33,7 +33,7 @@ class EmotionsViewController: UIViewController, UISplitViewControllerDelegate
         }
     }
     
-    func splitViewController(splitViewController: UISplitViewController, collapseSecondaryViewController secondaryViewController: UIViewController, ontoPrimaryViewController primaryViewController: UIViewController) -> Bool
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool
     {
 //        if primaryViewController.contentViewController == self {
 //            if let _ = secondaryViewController.contentViewController as? FaceViewController {

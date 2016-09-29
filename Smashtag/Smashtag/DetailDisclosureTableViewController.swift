@@ -8,12 +8,32 @@
 
 import UIKit
 import CoreData
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class DetailDisclosureTableViewController: CoreDataTableViewController {
 
     //Model
     var managedObjectContext: NSManagedObjectContext? =
-        (UIApplication.sharedApplication().delegate as? AppDelegate)?.managedObjectContext
+        (UIApplication.shared.delegate as? AppDelegate)?.managedObjectContext
     
     var mentionToSearchInCoreData: String? {
         didSet {
@@ -22,8 +42,8 @@ class DetailDisclosureTableViewController: CoreDataTableViewController {
         }
     }
     
-    private func updateUI() {
-        if let context = managedObjectContext where mentionToSearchInCoreData?.characters.count > 0 {
+    fileprivate func updateUI() {
+        if let context = managedObjectContext , mentionToSearchInCoreData?.characters.count > 0 {
             let request = NSFetchRequest(entityName: "Mention")
             request.predicate = NSPredicate(format: "any tweets.text contains[c] %@ and mentionCount > 1",mentionToSearchInCoreData!)
             request.sortDescriptors = [NSSortDescriptor(
@@ -44,14 +64,14 @@ class DetailDisclosureTableViewController: CoreDataTableViewController {
     
     // MARK: - Table view data source
   
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("MentionsOfSelectedRow", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MentionsOfSelectedRow", for: indexPath)
 
         // Configure the cell...
-        if let mention = fetchedResultsController?.objectAtIndexPath(indexPath) as? Mention {
+        if let mention = fetchedResultsController?.object(at: indexPath) as? Mention {
             var mentionName: String?
             
-            mention.managedObjectContext?.performBlockAndWait({ 
+            mention.managedObjectContext?.performAndWait({ 
                 mentionName = mention.keyword
             })
             cell.textLabel?.text = mentionName

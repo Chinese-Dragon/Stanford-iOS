@@ -14,7 +14,7 @@ class Mention: NSManagedObject {
     
     // Insert code here to add functionality to your managed object subclass
     
-    class func mentionWithTwitterInfo(twitterInfo:Twitter.Mention, currentCoreDataTweet: Tweet, inManagedObjectContext context: NSManagedObjectContext) -> Mention? {
+    class func mentionWithTwitterInfo(_ twitterInfo:Twitter.Mention, currentCoreDataTweet: Tweet, inManagedObjectContext context: NSManagedObjectContext) -> Mention? {
         
         let request = NSFetchRequest(entityName: "Mention")
         request.predicate = NSPredicate(format: "keyword matches[c] %@ and any tweets.unique = %@", twitterInfo.keyword, currentCoreDataTweet.unique!)
@@ -23,15 +23,15 @@ class Mention: NSManagedObject {
         request2.predicate = NSPredicate(format: "keyword matches[c] %@", twitterInfo.keyword)
     
         
-        if let _ = (try? context.executeFetchRequest(request))?.first as? Mention {
+        if let _ = (try? context.fetch(request))?.first as? Mention {
             return nil
-        } else if let mention = (try? context.executeFetchRequest(request2))?.first as? Mention{
-            mention.mutableSetValueForKey("tweets").addObject(currentCoreDataTweet)
+        } else if let mention = (try? context.fetch(request2))?.first as? Mention{
+            mention.mutableSetValue(forKey: "tweets").add(currentCoreDataTweet)
             mention.mentionCount += 1
             return mention
-        } else if let mention = NSEntityDescription.insertNewObjectForEntityForName("Mention", inManagedObjectContext: context) as? Mention {
+        } else if let mention = NSEntityDescription.insertNewObject(forEntityName: "Mention", into: context) as? Mention {
             mention.keyword = twitterInfo.keyword
-            mention.mutableSetValueForKey("tweets").addObject(currentCoreDataTweet)
+            mention.mutableSetValue(forKey: "tweets").add(currentCoreDataTweet)
             mention.mentionCount += 1
             return mention
         }

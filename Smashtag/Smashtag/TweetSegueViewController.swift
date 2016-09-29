@@ -29,23 +29,23 @@ class TweetSegueViewController: UITableViewController {
     }
     
     // getter ignored, if searchText is nil then the twitterRequest should be nil also
-    private var twitterRequest: Twitter.Request? {
+    fileprivate var twitterRequest: Twitter.Request? {
         if lastTwitterRequest == nil {
-            if let query = searchText where !query.isEmpty {
+            if let query = searchText , !query.isEmpty {
                 return Twitter.Request(search: query + " -filter:retweets", count: 30)
             }
         }
         return lastTwitterRequest?.requestForNewer
     }
     
-    private var lastTwitterRequest: Twitter.Request?
+    fileprivate var lastTwitterRequest: Twitter.Request?
     
-    private func searchForTweets() {
+    fileprivate func searchForTweets() {
         //make sure it is not nil
         if let request = twitterRequest {
             lastTwitterRequest = request
             request.fetchTweets { [weak weakSelf = self] newTweets in
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     if request == weakSelf?.lastTwitterRequest {
                         if !newTweets.isEmpty {
                             weakSelf?.tweets.insert(newTweets, atIndex: 0)
@@ -65,22 +65,22 @@ class TweetSegueViewController: UITableViewController {
     
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return tweets.count
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return tweets[section].count
     }
     
-    private struct Storyboard {
+    fileprivate struct Storyboard {
         static let TweetCellIndentifier = "tweet2"
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(Storyboard.TweetCellIndentifier, forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.TweetCellIndentifier, for: indexPath)
         
         let tweet = tweets[indexPath.section][indexPath.row]
         

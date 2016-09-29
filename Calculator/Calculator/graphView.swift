@@ -14,11 +14,11 @@ class graphView: UIView {
     @IBInspectable
     var PtPerUnit: CGFloat = 50 {didSet{setNeedsDisplay()}}
     @IBInspectable
-    var graphColor: UIColor = UIColor.brownColor() {didSet{setNeedsDisplay()}}
+    var graphColor: UIColor = UIColor.brown {didSet{setNeedsDisplay()}}
     @IBInspectable
     var lineWidth: CGFloat = 5.0 {didSet{setNeedsDisplay()}}
     @IBInspectable
-    var lineColor: UIColor = UIColor.redColor() {didSet{setNeedsDisplay()}}
+    var lineColor: UIColor = UIColor.red {didSet{setNeedsDisplay()}}
     
     var graphType = "" // default
     
@@ -27,20 +27,20 @@ class graphView: UIView {
         }
     }
    
-    private var originPoint: CGPoint {
+    fileprivate var originPoint: CGPoint {
         return CGPoint(x: bounds.midX, y: bounds.midY)
     }
     
-    private enum FunctionType {
-        case Linear(([AnyObject],CGPoint) -> UIBezierPath)
-        case Quadratic(([AnyObject]) -> UIBezierPath)
-        case Power(([AnyObject]) -> UIBezierPath)
-        case Sinusoidal(([AnyObject]) -> UIBezierPath)
+    fileprivate enum FunctionType {
+        case linear(([AnyObject],CGPoint) -> UIBezierPath)
+        case quadratic(([AnyObject]) -> UIBezierPath)
+        case power(([AnyObject]) -> UIBezierPath)
+        case sinusoidal(([AnyObject]) -> UIBezierPath)
     }
     
-    func changeScale(recognizer: UIPinchGestureRecognizer) {
+    func changeScale(_ recognizer: UIPinchGestureRecognizer) {
         switch recognizer.state {
-        case .Changed,.Ended:
+        case .changed,.ended:
             PtPerUnit *= recognizer.scale
             recognizer.scale = 1.0
         default:
@@ -49,42 +49,43 @@ class graphView: UIView {
     }
     
     
-    private var functions: Dictionary<String,FunctionType> = [
-        "Linear": FunctionType.Linear(){ (program: [AnyObject], center: CGPoint) -> UIBezierPath in
+    fileprivate var functions: Dictionary<String,FunctionType> = [
+        "Linear": FunctionType.linear(){ (program: [AnyObject], center: CGPoint) -> UIBezierPath in
             let path = UIBezierPath(arcCenter: center, radius: CGFloat(50), startAngle: 0, endAngle: CGFloat(2 * M_PI), clockwise: true)
             
             return path
         },
-        "Quadratic": FunctionType.Quadratic(){(program: [AnyObject]) -> UIBezierPath in
+        "Quadratic": FunctionType.quadratic(){(program: [AnyObject]) -> UIBezierPath in
             let path = UIBezierPath()
             
             return path
         },
-        "Power": FunctionType.Power(){(program: [AnyObject]) -> UIBezierPath in
+        "Power": FunctionType.power(){(program: [AnyObject]) -> UIBezierPath in
             let path = UIBezierPath()
             
             return path
         },
-        "Sinusoidal": FunctionType.Sinusoidal(){(program: [AnyObject]) -> UIBezierPath in
+        "Sinusoidal": FunctionType.sinusoidal(){(program: [AnyObject]) -> UIBezierPath in
             let path = UIBezierPath()
             
             return path
         }
     ]
     
-    override func drawRect(rect: CGRect){
-        var path = UIBezierPath() // default empty path
-        
+    override func draw(_ rect: CGRect){
+        let path = UIBezierPath() // default empty path
+        /*
         AxesDrawer(color: graphColor, contentScaleFactor: contentScaleFactor).drawAxesInRect(bounds, origin: originPoint, pointsPerUnit: PtPerUnit)
         if let fuc = functions[graphType] {
             switch fuc {
-                case .Linear(let linearFuc):
+                case .linear(let linearFuc):
                     path = linearFuc(programInfo, originPoint)
-                case .Power(let powerFuc): break
-                case .Quadratic(let quadraticFuc): break
-                case .Sinusoidal(let sinFuc): break
+                case .power(let powerFuc): break
+                case .quadratic(let quadraticFuc): break
+                case .sinusoidal(let sinFuc): break
             }
         }
+         */
         
         path.lineWidth = lineWidth
         lineColor.set()

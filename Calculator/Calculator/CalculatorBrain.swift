@@ -19,20 +19,20 @@ import Foundation //core service layer which has nothing to do with UI
 //Building API
 class CalculatorBrain {
     
-    private var accumulator = 0.0
-    private var description = ""
-    private var withUniary = false
-    private var withConstant = false
-    private var withVariable = false
-    private var equalBefore = false
-    private var lastResult = 0.0
-    private var internalProgram = [AnyObject]()
-    private var currentVariableValue = 0.0 //default value
+    fileprivate var accumulator = 0.0
+    fileprivate var description = ""
+    fileprivate var withUniary = false
+    fileprivate var withConstant = false
+    fileprivate var withVariable = false
+    fileprivate var equalBefore = false
+    fileprivate var lastResult = 0.0
+    fileprivate var internalProgram = [AnyObject]()
+    fileprivate var currentVariableValue = 0.0 //default value
 
     
     var newVariableValue: Double = 0.0 {
         willSet {
-            operations["M"] = Operation.Variable(newValue)
+            operations["M"] = Operation.variable(newValue)
         }
     }
     
@@ -43,11 +43,11 @@ class CalculatorBrain {
     }
     var isPartialResult = false
     
-    func setOperand(operand: AnyObject) {
+    func setOperand(_ operand: AnyObject) {
         if let operand = operand as? Double {
             accumulator = operand
-            internalProgram.append(operand)
-        } else if let variable = operand as? String, _ = operations[variable]{
+            internalProgram.append(operand as AnyObject)
+        } else if let variable = operand as? String, let _ = operations[variable]{
             performOperation(variable)
     
         }
@@ -56,64 +56,64 @@ class CalculatorBrain {
 
     
     //store value is enume that can have an associated value of any type
-    private var operations: Dictionary<String,Operation> = [
-        "π": Operation.Constant(M_PI), //M_PI
-        "e": Operation.Constant(M_E), //M_E
-        "M": Operation.Variable(0.0),
-        "√": Operation.UnaryOperation(sqrt), //sqrt
-        "cos": Operation.UnaryOperation(cos), //cos
-        "sin": Operation.UnaryOperation(sin),
-        "+/−": Operation.UnaryOperation(){-$0},
-        "%": Operation.UnaryOperation(){$0 / 100},
-        "×": Operation.BinaryOperation(){$0 * $1},
-        "÷": Operation.BinaryOperation(){$0 / $1},
-        "+": Operation.BinaryOperation(){$0 + $1},
-        "−": Operation.BinaryOperation(){$0 - $1},
-        "=": Operation.Equals,
-        "C": Operation.Cleans
+    fileprivate var operations: Dictionary<String,Operation> = [
+        "π": Operation.constant(M_PI), //M_PI
+        "e": Operation.constant(M_E), //M_E
+        "M": Operation.variable(0.0),
+        "√": Operation.unaryOperation(sqrt), //sqrt
+        "cos": Operation.unaryOperation(cos), //cos
+        "sin": Operation.unaryOperation(sin),
+        "+/−": Operation.unaryOperation(){-$0},
+        "%": Operation.unaryOperation(){$0 / 100},
+        "×": Operation.binaryOperation(){$0 * $1},
+        "÷": Operation.binaryOperation(){$0 / $1},
+        "+": Operation.binaryOperation(){$0 + $1},
+        "−": Operation.binaryOperation(){$0 - $1},
+        "=": Operation.equals,
+        "C": Operation.cleans
     ]
     
     //why we use enum is because we cannot use function in operations but constant
     //pass by value data structure
     //** All type should capatalized, eg. class, protocal, struct, enum
-    private enum Operation {
-        case Constant(Double)
-        case Variable(Double)
-        case UnaryOperation((Double) -> Double)
-        case BinaryOperation((Double,Double) -> Double)
-        case Equals
-        case Cleans
+    fileprivate enum Operation {
+        case constant(Double)
+        case variable(Double)
+        case unaryOperation((Double) -> Double)
+        case binaryOperation((Double,Double) -> Double)
+        case equals
+        case cleans
     }
     
-    func performOperation(symbol: String) {
-        internalProgram.append(symbol)
+    func performOperation(_ symbol: String) {
+        internalProgram.append(symbol as AnyObject)
         //the dictionary may not have the key
         if let operation = operations[symbol] {
             switch operation {
-            case .Constant(let value):
+            case .constant(let value):
                 if equalBefore {
                     cleanDescription()
-                    description.appendContentsOf(symbol)
+                    description.append(symbol)
                     equalBefore = false
                 } else {
-                    description.appendContentsOf(symbol)
+                    description.append(symbol)
                 }
                 accumulator = value
                 withConstant = true
                 
-            case .Variable(let variableValue):
+            case .variable(let variableValue):
                 if equalBefore {
                     cleanDescription()
-                    description.appendContentsOf(symbol)
+                    description.append(symbol)
                     equalBefore = false
                 } else {
-                    description.appendContentsOf(symbol)
+                    description.append(symbol)
                 }
                 accumulator = variableValue
                 withVariable = true
         
                 
-            case .UnaryOperation(let function):
+            case .unaryOperation(let function):
                 
                 if !isPartialResult{
                     if description == " "{
@@ -130,20 +130,20 @@ class CalculatorBrain {
                 
                 accumulator = function(accumulator)
                 
-            case .BinaryOperation(let function):
+            case .binaryOperation(let function):
                 
                 if pending != nil {
                     if withUniary{
-                        description.appendContentsOf(symbol)
+                        description.append(symbol)
                         withUniary = false
                     } else if withConstant{
-                        description.appendContentsOf(symbol)
+                        description.append(symbol)
                         withConstant = false
                     } else if withVariable {
-                        description.appendContentsOf(symbol)
+                        description.append(symbol)
                         withVariable = false
                     } else {
-                        description.appendContentsOf(String(accumulator)+symbol)
+                        description.append(String(accumulator)+symbol)
                     }
                     accumulator = pending!.binaryFunction(pending!.firstOperand,accumulator)
                     pending = PendingBinaryOperationInfo(binaryFunction: function, firstOperand: accumulator)
@@ -151,25 +151,25 @@ class CalculatorBrain {
                 } else {
                     if checkEqualOfLastResultAndCurrentDisplay(lastResult, currentDisplay: accumulator){
                         if equalBefore{
-                            description.appendContentsOf(symbol)
+                            description.append(symbol)
                             equalBefore = false
                         } else {
-                            description.appendContentsOf(String(accumulator)+symbol)
+                            description.append(String(accumulator)+symbol)
                         }
                     } else{
                         resetEverythingAboutDescription()
-                        description.appendContentsOf(String(accumulator)+symbol)
+                        description.append(String(accumulator)+symbol)
                     }
                     pending = PendingBinaryOperationInfo(binaryFunction: function, firstOperand: accumulator)
                 }
                 isPartialResult = true
                 
-            case .Equals:
+            case .equals:
                 
                 equalBefore = true
                 if pending != nil {
                     if !withUniary && !withConstant && !withVariable{
-                        description.appendContentsOf(String(accumulator))
+                        description.append(String(accumulator))
                     } else{
                         withConstant = false
                         withUniary = false
@@ -179,7 +179,7 @@ class CalculatorBrain {
                     pending = nil
                     isPartialResult = false
                 }
-            case .Cleans:
+            case .cleans:
                 cleanAll()
                 newVariableValue = 0.0
             }
@@ -188,9 +188,9 @@ class CalculatorBrain {
     }
     
     // it is optional because it is initilized when there is a Pending Operation
-    private var pending: PendingBinaryOperationInfo?
+    fileprivate var pending: PendingBinaryOperationInfo?
     
-    private struct PendingBinaryOperationInfo {
+    fileprivate struct PendingBinaryOperationInfo {
         var binaryFunction: (Double,Double) -> Double //type of local variable is a function
         var firstOperand: Double
     }
@@ -198,7 +198,7 @@ class CalculatorBrain {
     typealias propertyList = AnyObject
     var program: propertyList {
         get {
-            return internalProgram
+            return internalProgram as CalculatorBrain.propertyList
         }
         set {
             cleanAll()
@@ -207,7 +207,7 @@ class CalculatorBrain {
                 for op in arrayOfOp {
                     print(op)
                     if let operand = op as? Double {
-                        setOperand(operand)
+                        setOperand(operand as AnyObject)
                     } else if let operation = op as? String {
                         performOperation(operation)
                     }
@@ -225,11 +225,11 @@ class CalculatorBrain {
         }
     }
     
-    private func cleanDescription(){
+    fileprivate func cleanDescription(){
         description = " "
     }
     
-    private func checkEqualOfLastResultAndCurrentDisplay(lastResult: Double, currentDisplay: Double) -> Bool{
+    fileprivate func checkEqualOfLastResultAndCurrentDisplay(_ lastResult: Double, currentDisplay: Double) -> Bool{
         var check = false
         if lastResult == currentDisplay {
             check = true
@@ -237,7 +237,7 @@ class CalculatorBrain {
         return check
     }
     
-    private func resetEverythingAboutDescription(){
+    fileprivate func resetEverythingAboutDescription(){
         description = " "
         withUniary = false
         withConstant = false
@@ -245,7 +245,7 @@ class CalculatorBrain {
         equalBefore = false
     }
     
-    private func cleanAll(){
+    fileprivate func cleanAll(){
         isPartialResult = false
         pending = nil
         accumulator = 0.0

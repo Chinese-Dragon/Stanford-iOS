@@ -22,7 +22,7 @@ class GraphViewController: UIViewController {
     @IBOutlet weak var graph: graphView! {
         didSet{
             
-            graph.addGestureRecognizer(UIPinchGestureRecognizer(target: graph, action: #selector(graphView.changeScale(_:))))
+            graph.addGestureRecognizer(UIPinchGestureRecognizer(target: graph, action: #selector(graph.changeScale)))
             updateGraph()
         }
     }
@@ -33,7 +33,7 @@ class GraphViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-    private func checkFunctionType(data: [AnyObject]) -> String {
+    fileprivate func checkFunctionType(_ data: [AnyObject]) -> String {
         var type = "Linear"
         for item in data {
             if let strItem = item as? String{
@@ -45,7 +45,7 @@ class GraphViewController: UIViewController {
         return type
     }
 
-    private func updateGraph() {
+    fileprivate func updateGraph() {
         if graph != nil && !graphProramData.isEmpty {
             graph.graphType = checkFunctionType(graphProramData)
             graph.programInfo = graphProramData

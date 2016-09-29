@@ -10,23 +10,23 @@ import Foundation
 
 // container to hold data about a Twitter user
 
-public class User: NSObject
+open class User: NSObject
 {
-    public let screenName: String
-    public let name: String
-    public let id: String
-    public let verified: Bool
-    public let profileImageURL: NSURL?
+    open let screenName: String
+    open let name: String
+    open let id: String
+    open let verified: Bool
+    open let profileImageURL: URL?
     
-    public override var description: String { return "@\(screenName) (\(name))\(verified ? " ✅" : "")" }
+    open override var description: String { return "@\(screenName) (\(name))\(verified ? " ✅" : "")" }
     
     // MARK: - Internal Implementation
     
     init?(data: NSDictionary?) {
         guard
-            let screenName = data?.valueForKeyPath(TwitterKey.ScreenName) as? String,
-            let name = data?.valueForKeyPath(TwitterKey.Name) as? String,
-            let id = data?.valueForKeyPath(TwitterKey.ID) as? String
+            let screenName = data?.value(forKeyPath: TwitterKey.ScreenName) as? String,
+            let name = data?.value(forKeyPath: TwitterKey.Name) as? String,
+            let id = data?.value(forKeyPath: TwitterKey.ID) as? String
         else {
             return nil
         }
@@ -35,11 +35,12 @@ public class User: NSObject
         self.name = name
         self.id = id
 
-        self.verified = data?.valueForKeyPath(TwitterKey.Verified)?.boolValue ?? false
-        let urlString = data?.valueForKeyPath(TwitterKey.ProfileImageURL) as? String ?? ""
-        self.profileImageURL = (urlString.characters.count > 0) ? NSURL(string: urlString) : nil
+        self.verified = (data?.value(forKeyPath: TwitterKey.Verified) as AnyObject).boolValue ?? false
+        let urlString = data?.value(forKeyPath: TwitterKey.ProfileImageURL) as? String ?? ""
+        self.profileImageURL = (urlString.characters.count > 0) ? URL(string: urlString) : nil
     }
     
+    /*
     var asPropertyList: AnyObject {
         return [
             TwitterKey.Name:name,
@@ -49,6 +50,7 @@ public class User: NSObject
             TwitterKey.ProfileImageURL:profileImageURL?.absoluteString ?? ""
         ]
     }
+ */
     
     struct TwitterKey {
         static let Name = "name"

@@ -20,10 +20,10 @@ class FaceView: UIView {
             return _scale
         }
         set {
-            UIView.transitionWithView(
-                self,
+            UIView.transition(
+                with: self,
                 duration: 0.2,
-                options: [.CurveLinear,.TransitionCrossDissolve],
+                options: [.curveLinear,.transitionCrossDissolve],
                 animations: {
                     self._scale = newValue
                 },
@@ -40,10 +40,10 @@ class FaceView: UIView {
             return _mouthCurvature
         }
         set {
-            UIView.transitionWithView(
-                self,
+            UIView.transition(
+                with: self,
                 duration: 0.2,
-                options: [.CurveLinear,.TransitionCrossDissolve],
+                options: [.curveLinear,.transitionCrossDissolve],
                 animations: {
                     self._mouthCurvature = newValue
                 },
@@ -57,14 +57,14 @@ class FaceView: UIView {
     @IBInspectable
     var eyeBrowTilt: Double = -0.5 {didSet {setNeedsDisplay()}}// -1 full furrpw, 1 fully relaxed
     @IBInspectable
-    var color:UIColor = UIColor.orangeColor() {didSet {setNeedsDisplay(); leftEye.color = color; rightEye.color = color }}
+    var color:UIColor = UIColor.orange {didSet {setNeedsDisplay(); leftEye.color = color; rightEye.color = color }}
     @IBInspectable
     var lineWidth: CGFloat = 3.0 {didSet {setNeedsDisplay(); leftEye.lineWidth = lineWidth; rightEye.lineWidth = lineWidth}}
     
-    func changeScale(recognizer: UIPinchGestureRecognizer)
+    func changeScale(_ recognizer: UIPinchGestureRecognizer)
     {
         switch recognizer.state {
-        case .Changed,.Ended:
+        case .changed,.ended:
             scale *= recognizer.scale
             recognizer.scale = 1.0
         default:
@@ -72,16 +72,16 @@ class FaceView: UIView {
         }
     } 
     
-    private var skullRadius: CGFloat
+    fileprivate var skullRadius: CGFloat
     {
          return min(bounds.size.width, bounds.size.height) / 2 * scale
     }
-    private var skullCenter: CGPoint
+    fileprivate var skullCenter: CGPoint
     {
         return CGPoint(x: bounds.midX, y: bounds.midY)
     }
     
-    private struct Ratios
+    fileprivate struct Ratios
     {
         static let SkullRadiusToEyeOffset: CGFloat = 3
         static let SkullRadiusToEyeRadius: CGFloat = 10
@@ -91,13 +91,13 @@ class FaceView: UIView {
         static let SkullRadiusToBrowOffset: CGFloat = 5
     }
     
-    private  enum Eye
+    fileprivate  enum Eye
     {
-        case Left
-        case Right
+        case left
+        case right
     }
     
-    private func pathForCircleCenteredAtPoint(midPoint: CGPoint, withRadius radius: CGFloat) -> UIBezierPath
+    fileprivate func pathForCircleCenteredAtPoint(_ midPoint: CGPoint, withRadius radius: CGFloat) -> UIBezierPath
     {
         let path = UIBezierPath(arcCenter: midPoint,
                             radius: radius,
@@ -108,14 +108,14 @@ class FaceView: UIView {
         return path
     }
     
-    private func getEyeCenter(eye: Eye) -> CGPoint
+    fileprivate func getEyeCenter(_ eye: Eye) -> CGPoint
     {
         let eyeOffset = skullRadius / Ratios.SkullRadiusToEyeOffset
         var eyeCenter = skullCenter
         eyeCenter.y -= eyeOffset
         switch eye {
-        case .Left: eyeCenter.x -= eyeOffset
-        case .Right: eyeCenter.x += eyeOffset
+        case .left: eyeCenter.x -= eyeOffset
+        case .right: eyeCenter.x += eyeOffset
         }
         return eyeCenter
     }
@@ -123,22 +123,22 @@ class FaceView: UIView {
     // Instead, we are using EyeView to add to FaceView'
     //During initilization phrase self is not full initilized so we cannot use self and call its method
     //lazy means when someone call the variable it then will be initilized
-    private lazy var leftEye: EyeView = self.createEye()
-    private lazy var rightEye: EyeView = self.createEye()
+    fileprivate lazy var leftEye: EyeView = self.createEye()
+    fileprivate lazy var rightEye: EyeView = self.createEye()
     
-    private func createEye() -> EyeView {
+    fileprivate func createEye() -> EyeView {
         print("i am called")
         let eye = EyeView()
-        eye.opaque = false
+        eye.isOpaque = false
         eye.color = color
         eye.lineWidth = lineWidth
         self.addSubview(eye)
         return eye
     }
     
-    private func positionEye(eye: EyeView, center: CGPoint) {
+    fileprivate func positionEye(_ eye: EyeView, center: CGPoint) {
         let size = skullRadius / Ratios.SkullRadiusToEyeRadius * 2
-        eye.frame = CGRect(origin: CGPointZero, size: CGSize(width: size, height: size))
+        eye.frame = CGRect(origin: CGPoint.zero, size: CGSize(width: size, height: size))
         eye.center = center
     }
     
@@ -146,16 +146,16 @@ class FaceView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         print("layoutSubviews is called")
-        positionEye(leftEye, center: getEyeCenter(.Left))
-        positionEye(rightEye, center: getEyeCenter(.Right))
+        positionEye(leftEye, center: getEyeCenter(.left))
+        positionEye(rightEye, center: getEyeCenter(.right))
     }
  
-    private func pathForBrow(eye: Eye) -> UIBezierPath
+    fileprivate func pathForBrow(_ eye: Eye) -> UIBezierPath
     {
         var tilt = eyeBrowTilt
         switch eye {
-        case .Left: tilt *= -1.0
-        case .Right: break
+        case .left: tilt *= -1.0
+        case .right: break
         }
         var browCenter = getEyeCenter(eye)
         browCenter.y -= skullRadius / Ratios.SkullRadiusToBrowOffset
@@ -164,13 +164,13 @@ class FaceView: UIView {
         let browStart = CGPoint(x: browCenter.x - eyeRadius, y: browCenter.y - tiltOffset)
         let browEnd = CGPoint(x: browCenter.x + eyeRadius, y: browCenter.y + tiltOffset)
         let path = UIBezierPath()
-        path.moveToPoint(browStart)
-        path.addLineToPoint(browEnd)
+        path.move(to: browStart)
+        path.addLine(to: browEnd)
         path.lineWidth = lineWidth
         return path
     }
     
-    private func pathForMouth() -> UIBezierPath
+    fileprivate func pathForMouth() -> UIBezierPath
     {
         let mouthWidth = skullRadius / Ratios.SkullRadiusToMouthWidth
         let mouthHeight = skullRadius / Ratios.SkullRadiusToMouthHeight
@@ -185,22 +185,22 @@ class FaceView: UIView {
         let cp2 = CGPoint(x: mouthRect.maxX - mouthRect.width / 3, y: mouthRect.minY + smileOffset)
         
         let path = UIBezierPath()
-        path.moveToPoint(start)
-        path.addCurveToPoint(end, controlPoint1: cp1, controlPoint2: cp2)
+        path.move(to: start)
+        path.addCurve(to: end, controlPoint1: cp1, controlPoint2: cp2)
         path.lineWidth = lineWidth
         return path
         
     }
     
-    override func drawRect(rect: CGRect)
+    override func draw(_ rect: CGRect)
     {
         color.set()
         pathForCircleCenteredAtPoint(skullCenter, withRadius: skullRadius).stroke()
         pathForMouth().stroke()
-        pathForBrow(.Left).stroke()
-        pathForBrow(.Right).stroke()
-        positionEye(leftEye, center: getEyeCenter(.Left))
-        positionEye(rightEye, center: getEyeCenter(.Right))
+        pathForBrow(.left).stroke()
+        pathForBrow(.right).stroke()
+        positionEye(leftEye, center: getEyeCenter(.left))
+        positionEye(rightEye, center: getEyeCenter(.right))
     }
 
 

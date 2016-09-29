@@ -13,17 +13,17 @@ class TweetDetailTableViewCell: UITableViewCell {
     @IBOutlet weak var tweetImage: UIImageView!
     
     //Model
-    var imageURL: NSURL? {
+    var imageURL: URL? {
         didSet{
             fetchImage()
         }
     }
     
-    private func fetchImage() {
+    fileprivate func fetchImage() {
         if let url = imageURL {
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) {
-                let contentOfURL = NSData(contentsOfURL: url)
-                dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
+                let contentOfURL = try? Data(contentsOf: url)
+                DispatchQueue.main.async {
                     if url == self.imageURL {
                         if let imageData = contentOfURL {
                             self.tweetImage.image = UIImage(data: imageData)

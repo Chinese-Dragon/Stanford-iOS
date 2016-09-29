@@ -16,7 +16,7 @@ class NamedBezierPathsView: UIView
         }
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         // Drawing code
         for (_,path) in bezierPaths {
             path.stroke()

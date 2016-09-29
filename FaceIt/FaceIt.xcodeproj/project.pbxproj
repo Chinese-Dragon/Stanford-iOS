@@ -120,6 +120,7 @@
 					4D1014F01D0A871C005439A8 = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = ZU7PA4P32X;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -284,6 +285,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mark.FaceIt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -295,6 +297,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mark.FaceIt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

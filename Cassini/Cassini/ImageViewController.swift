@@ -12,7 +12,7 @@ import UIKit
 class ImageViewController: UIViewController, UIScrollViewDelegate {
     
     //Model
-    var imageURL: NSURL? {
+    var imageURL: URL? {
         didSet {
             image = nil
             if view.window != nil {
@@ -34,17 +34,17 @@ class ImageViewController: UIViewController, UIScrollViewDelegate {
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
-    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
     
-    private func fetchImage() {
+    fileprivate func fetchImage() {
         if let url = imageURL{
             //same thing as scrollView outlet in image set
             spinner?.startAnimating()
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)){
-                let contentOfURL = NSData(contentsOfURL: url)
-                dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async{
+                let contentOfURL = try? Data(contentsOf: url)
+                DispatchQueue.main.async {
                     if url == self.imageURL{
                         print("I am in current window and ready to update UI")
                         if let imageData = contentOfURL {
@@ -63,11 +63,11 @@ class ImageViewController: UIViewController, UIScrollViewDelegate {
     }
     
     //View
-    private var imageView = UIImageView()
+    fileprivate var imageView = UIImageView()
     
     //use computed property to save time so that every time when we want to set new image,
     //we can just say image = ...
-    private var image: UIImage? {
+    fileprivate var image: UIImage? {
         get {
             return imageView.image
         }
@@ -80,7 +80,7 @@ class ImageViewController: UIViewController, UIScrollViewDelegate {
     }
     
     //This is the place to fire off expensive operations like fetching data
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if image == nil {
             fetchImage()

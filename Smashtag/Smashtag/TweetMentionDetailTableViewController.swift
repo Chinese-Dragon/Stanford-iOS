@@ -19,22 +19,22 @@ class TweetMentionDetailTableViewController: UITableViewController {
         }
     }
     
-    private let numberOfSection = 4
+    fileprivate let numberOfSection = 4
     
-    private struct Storyboard {
+    fileprivate struct Storyboard {
         static let TweetImageCellIdentifier = "images"
         static let TweetMentionCellIdentifier = "mentions"
         static let SegueIdentifier = "Show Tweets"
     }
     
-    private var sectionIdentifiers: Dictionary<Int,String> = [
+    fileprivate var sectionIdentifiers: Dictionary<Int,String> = [
         0: "images",
         1: "mentions",
         2: "mentions",
         3: "mentions"
     ]
     
-    private var sectionNames : Dictionary<Int,String> = [
+    fileprivate var sectionNames : Dictionary<Int,String> = [
         0 : "Images",
         1 : "Hashtags",
         2 : "Users",
@@ -48,11 +48,11 @@ class TweetMentionDetailTableViewController: UITableViewController {
     
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return numberOfSection
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let currentTweet = tweet{
             return getTweetInfo(section, tweet: currentTweet)
         } else {
@@ -60,13 +60,13 @@ class TweetMentionDetailTableViewController: UITableViewController {
         }
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(sectionIdentifiers[indexPath.section]!, forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: sectionIdentifiers[(indexPath as NSIndexPath).section]!, for: indexPath)
         if let currentTweet = tweet {
             if let imageCell = cell as? TweetDetailTableViewCell {
                 imageCell.imageURL = currentTweet.media[indexPath.row].url
             } else {
-                switch indexPath.section {
+                switch (indexPath as NSIndexPath).section {
                 case 1:
                     cell.textLabel?.text = currentTweet.hashtags[indexPath.row].keyword
                 case 2:
@@ -81,7 +81,7 @@ class TweetMentionDetailTableViewController: UITableViewController {
         return cell
     }
     
-    private func getTweetInfo(section: Int,tweet: Twitter.Tweet) -> Int{
+    fileprivate func getTweetInfo(_ section: Int,tweet: Twitter.Tweet) -> Int{
         switch section {
         case 0: return tweet.media.count
         case 1: return tweet.hashtags.count
@@ -91,7 +91,7 @@ class TweetMentionDetailTableViewController: UITableViewController {
         }
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if let currentTweet = tweet{
             if getTweetInfo(section, tweet: currentTweet) != 0 {
                 return sectionNames[section]
@@ -100,9 +100,9 @@ class TweetMentionDetailTableViewController: UITableViewController {
         return nil
     }
     
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if let currentTweet = tweet {
-            if indexPath.section == 0 {
+            if (indexPath as NSIndexPath).section == 0 {
                 return tableView.frame.width / CGFloat(currentTweet.media[indexPath.row].aspectRatio)
             }
         }
@@ -110,12 +110,12 @@ class TweetMentionDetailTableViewController: UITableViewController {
     }
        
     // MARK: - Navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let cell = sender as? UITableViewCell,let currentTweet = tweet{
-            let sec = self.tableView.indexPathForCell(cell)!.section
-            let row = self.tableView.indexPathForCell(cell)!.row
+            let sec = (self.tableView.indexPath(for: cell)! as NSIndexPath).section
+            let row = (self.tableView.indexPath(for: cell)! as NSIndexPath).row
             print("Section \(sec) Row \(row)")
-            if segue.identifier == Storyboard.SegueIdentifier,let vc = segue.destinationViewController as? TweetSegueViewController {
+            if segue.identifier == Storyboard.SegueIdentifier,let vc = segue.destination as? TweetSegueViewController {
                 switch sec {
                 case 1:
                     let searchHashTag = currentTweet.hashtags[row].keyword
@@ -132,19 +132,19 @@ class TweetMentionDetailTableViewController: UITableViewController {
         }
     }
     
-    private func storeForever(searchInfo: String) {
+    fileprivate func storeForever(_ searchInfo: String) {
         if RecentSearchHistory.count == HistorySize{
             RecentSearchHistory.removeFirst()
             RecentSearchHistory.append(searchInfo)
         } else {
             RecentSearchHistory.append(searchInfo)
         }
-        NSUserDefaults.standardUserDefaults().setObject(RecentSearchHistory, forKey: "myData")
+        UserDefaults.standard.set(RecentSearchHistory, forKey: "myData")
     }
     
-    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         if let cell = sender as? UITableViewCell{
-            let sec = self.tableView.indexPathForCell(cell)!.section
+            let sec = (self.tableView.indexPath(for: cell)! as NSIndexPath).section
             if identifier == Storyboard.SegueIdentifier && sec != 3 {
                 return true
             }
@@ -152,10 +152,10 @@ class TweetMentionDetailTableViewController: UITableViewController {
         return false
     }
     
-    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
-        if indexPath.section == 3, let currentTweet = tweet {
-            if let url = NSURL(string: currentTweet.urls[indexPath.row].keyword) {
-                UIApplication.sharedApplication().openURL(url)
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if (indexPath as NSIndexPath).section == 3, let currentTweet = tweet {
+            if let url = URL(string: currentTweet.urls[indexPath.row].keyword) {
+                UIApplication.sharedApplication.openURL(url)
             }
         }
         return indexPath

@@ -14,16 +14,16 @@ import Twitter
 class Tweet: NSManagedObject {
     
     //load up twitter's tweets into coredata database
-    class func tweetWithTwitterInfo(twitterInfo: Twitter.Tweet, inManagedObjectContext context: NSManagedObjectContext) -> Tweet?
+    class func tweetWithTwitterInfo(_ twitterInfo: Twitter.Tweet, inManagedObjectContext context: NSManagedObjectContext) -> Tweet?
     {
         let request = NSFetchRequest(entityName: "Tweet")
         request.predicate = NSPredicate(format: "unique = %@", twitterInfo.id)
         
-        if let tweet = (try? context.executeFetchRequest(request))?.first as? Tweet
+        if let tweet = (try? context.fetch(request))?.first as? Tweet
         {
             return tweet
             
-        } else if let tweet = NSEntityDescription.insertNewObjectForEntityForName("Tweet", inManagedObjectContext: context) as? Tweet
+        } else if let tweet = NSEntityDescription.insertNewObject(forEntityName: "Tweet", into: context) as? Tweet
         {
             tweet.unique = twitterInfo.id
             tweet.posted = twitterInfo.created
@@ -31,7 +31,7 @@ class Tweet: NSManagedObject {
             tweet.tweeter = TwitterUser.TwitterUserWithTwitterInfo(twitterInfo.user, inManagedObjectContext: context)
             
             let allMentionsWithTwitterInfo = twitterInfo.hashtags + twitterInfo.userMentions
-            let mentionsNSSet = tweet.mutableSetValueForKey("mentions")
+            let mentionsNSSet = tweet.mutableSetValue(forKey: "mentions")
             
             print("\(allMentionsWithTwitterInfo.count) allMentions")
             for currentMention in allMentionsWithTwitterInfo

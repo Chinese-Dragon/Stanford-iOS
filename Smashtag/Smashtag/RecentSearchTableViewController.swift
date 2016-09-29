@@ -13,38 +13,38 @@ class RecentSearchTableViewController: UITableViewController {
     //Model -- RecentSearchHistory: the global data
     override func viewDidLoad() {
         title = "History"
-        if NSUserDefaults.standardUserDefaults().objectForKey("myData") != nil {
+        if UserDefaults.standard.object(forKey: "myData") != nil {
             
             //model
-            RecentSearchHistory = NSUserDefaults.standardUserDefaults().objectForKey("myData") as! [String]
+            RecentSearchHistory = UserDefaults.standard.object(forKey: "myData") as! [String]
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         tableView.reloadData()
     }
     
-    private struct Storyboard {
+    fileprivate struct Storyboard {
         static let segueIdentifier = "Show Tweets"
         static let segueIdentifier2 = "Show Detail"
     }
 
     // MARK: - Table view data source
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return RecentSearchHistory.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("history", forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "history", for: indexPath)
 
         if !RecentSearchHistory.isEmpty{
-            cell.textLabel?.text = RecentSearchHistory[RecentSearchHistory.count - indexPath.row - 1]
+            cell.textLabel?.text = RecentSearchHistory[RecentSearchHistory.count - (indexPath as NSIndexPath).row - 1]
             
         }
         // Configure the cell...
@@ -55,13 +55,13 @@ class RecentSearchTableViewController: UITableViewController {
     
     // MARK: - Navigation
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == Storyboard.segueIdentifier, let dvc = segue.destinationViewController as? TweetSegueViewController
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == Storyboard.segueIdentifier, let dvc = segue.destination as? TweetSegueViewController
         {
-            dvc.searchText = RecentSearchHistory[RecentSearchHistory.count - (self.tableView.indexPathForCell(sender as! UITableViewCell)?.row)! - 1]
-        } else if segue.identifier == Storyboard.segueIdentifier2, let dvc = segue.destinationViewController as? DetailDisclosureTableViewController
+            dvc.searchText = RecentSearchHistory[RecentSearchHistory.count - ((self.tableView.indexPath(for: sender as! UITableViewCell) as NSIndexPath?)?.row)! - 1]
+        } else if segue.identifier == Storyboard.segueIdentifier2, let dvc = segue.destination as? DetailDisclosureTableViewController
         {
-            dvc.mentionToSearchInCoreData = RecentSearchHistory[RecentSearchHistory.count - (self.tableView.indexPathForCell(sender as! UITableViewCell)?.row)! - 1]
+            dvc.mentionToSearchInCoreData = RecentSearchHistory[RecentSearchHistory.count - ((self.tableView.indexPath(for: sender as! UITableViewCell) as NSIndexPath?)?.row)! - 1]
         }
     }
     

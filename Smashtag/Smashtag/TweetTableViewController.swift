@@ -28,7 +28,7 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
     }
     
     var managedObjectContext: NSManagedObjectContext? =
-        (UIApplication.sharedApplication().delegate as? AppDelegate)?.managedObjectContext
+        (UIApplication.shared.delegate as? AppDelegate)?.managedObjectContext
     
     var searchText: String? {
         didSet {
@@ -41,7 +41,7 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
     
     
     //Storyboard stuff
-    private struct Storyboard {
+    fileprivate struct Storyboard {
         static let TweetCellIndentifier = "Tweet"
         static let SegueIndentifier = "show Tweet Info"
         static let SegueIndentifier2 = "TweetersMentioningSearchTerm"
@@ -53,33 +53,33 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
         super.viewDidLoad()
         tableView.estimatedRowHeight = tableView.rowHeight
         tableView.rowHeight = UITableViewAutomaticDimension
-        if NSUserDefaults.standardUserDefaults().objectForKey("myData") != nil {
-            RecentSearchHistory = NSUserDefaults.standardUserDefaults().objectForKey("myData") as! [String]
+        if UserDefaults.standard.object(forKey: "myData") != nil {
+            RecentSearchHistory = UserDefaults.standard.object(forKey: "myData") as! [String]
         }
     }
     
     //Search tweets and stuff
     // getter ignored, if searchText is nil then the twitterRequest should be nil also
-    private var twitterRequest: Twitter.Request? {
+    fileprivate var twitterRequest: Twitter.Request? {
         if lastTwitterRequest == nil {
-            if let query = searchText where !query.isEmpty {
+            if let query = searchText , !query.isEmpty {
                 return Twitter.Request(search: query + " -filter:retweets", count: 5)
             }
         }
         return lastTwitterRequest?.requestForNewer
     }
     
-    private var lastTwitterRequest: Twitter.Request?
+    fileprivate var lastTwitterRequest: Twitter.Request?
     
-    private func searchForTweets() {
+    fileprivate func searchForTweets() {
         //make sure it is not nil
         if let request = twitterRequest {
             lastTwitterRequest = request
             request.fetchTweets { [weak weakSelf = self] newTweets in
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     if request == weakSelf?.lastTwitterRequest {
                         if !newTweets.isEmpty {
-                            weakSelf?.tweets.insert(newTweets, atIndex: 0)
+                            weakSelf?.tweets.insert(newTweets, at: 0)
                         }
                     }
                     weakSelf?.refreshControl?.endRefreshing()
@@ -93,23 +93,23 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
         
     }
     
-    private func storeForever(searchInfo: String) {
+    fileprivate func storeForever(_ searchInfo: String) {
         if RecentSearchHistory.count == HistorySize{
             RecentSearchHistory.removeFirst()
             RecentSearchHistory.append(searchInfo)
         } else {
             RecentSearchHistory.append(searchInfo)
         }
-        NSUserDefaults.standardUserDefaults().setObject(RecentSearchHistory, forKey: "myData")
+        UserDefaults.standard.set(RecentSearchHistory, forKey: "myData")
     }
     
-    @IBAction func refresh(sender: UIRefreshControl) {
+    @IBAction func refresh(_ sender: UIRefreshControl) {
         searchForTweets()
     }
     
-    private func updateDatabase(newTweets:[Twitter.Tweet]) {
+    fileprivate func updateDatabase(_ newTweets:[Twitter.Tweet]) {
         //closure here
-        managedObjectContext?.performBlock{
+        managedObjectContext?.perform{
             for twitterInfo in newTweets {
                 _ = Tweet.tweetWithTwitterInfo(twitterInfo, inManagedObjectContext: self.managedObjectContext!)
             }
@@ -124,17 +124,19 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
         print("Done printing db statistics")
     }
     
-    private func printDatabaseStatistics() {
-        managedObjectContext?.performBlock {
-            if let results = try? self.managedObjectContext!.executeFetchRequest(NSFetchRequest(entityName: "TwitterUser")) {
+    fileprivate func printDatabaseStatistics() throws {
+        managedObjectContext?.perform {
+            if let results = try? self.managedObjectContext!.fetch(NSFetchRequest(entityName: "TwitterUser")) {
                 print("\(results.count) Twitter Users in my database")
             }
             
             //more efficient way to count objects in db
-            let tweetCount = self.managedObjectContext!.countForFetchRequest(NSFetchRequest(entityName: "Tweet"), error: nil)
+            guard let tweetCount = self.managedObjectContext!.count(for: NSFetchRequest(entityName: "Tweet")) else  {
+                
+            }
             print("\(tweetCount) tweets in my DB ")
             
-            let mentionCount = self.managedObjectContext!.countForFetchRequest(NSFetchRequest(entityName:"Mention"), error: nil)
+            guard let mentionCount = self.managedObjectContext!.count(for: NSFetchRequest(entityName:"Mention"))
             print("\(mentionCount) mentions in my DB")
         }
         
@@ -143,18 +145,18 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
     
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return tweets.count
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return tweets[section].count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(Storyboard.TweetCellIndentifier, forIndexPath: indexPath)
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.TweetCellIndentifier, for: indexPath)
         
         let tweet = tweets[indexPath.section][indexPath.row]
         
@@ -173,7 +175,7 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
         }
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         searchTextField.resignFirstResponder()
         searchText = textField.text
         if let searchInfo = textField.text {
@@ -185,18 +187,18 @@ class TweetTableViewController: UITableViewController,UITextFieldDelegate {
     
     
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         if segue.identifier == Storyboard.SegueIndentifier {
             if let cell = sender as? TweetTableViewCell {
-                let tweet = tweets[(self.tableView.indexPathForCell(cell)?.section)!][(self.tableView.indexPathForCell(cell)?.row)!]
-                if let vc = segue.destinationViewController as? TweetMentionDetailTableViewController {
+                let tweet = tweets[(self.tableView.indexPath(for: cell)?.section)!][(self.tableView.indexPathForCell(cell)?.row)!]
+                if let vc = segue.destination as? TweetMentionDetailTableViewController {
                     vc.tweet = tweet
                 }
             }
         } else if segue.identifier == Storyboard.SegueIndentifier2 {
-            if let tweetersTVC = segue.destinationViewController as? TweetersTableViewController {
+            if let tweetersTVC = segue.destination as? TweetersTableViewController {
                 tweetersTVC.mention = searchText
                 tweetersTVC.managedObjectContext = managedObjectContext
             }
